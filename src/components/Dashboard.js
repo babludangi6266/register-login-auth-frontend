@@ -4,23 +4,38 @@ import "../styles/Dashboard.css";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    if (Object.keys(storedUser).length > 0) {
-      setUser(storedUser);
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (Object.keys(parsedUser).length > 0) {
+          setUser(parsedUser);
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        navigate("/login");
+      }
     } else {
       navigate("/login");
     }
+    setLoading(false);
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      navigate("/login");
+    }
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="dashboard-container">
